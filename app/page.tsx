@@ -22,14 +22,6 @@ export default function Home() {
           />
         </div>
 
-        <div className="mt-6 text-center text-gray-400">
-          <p className="text-sm">
-            Use your mouse to orbit, zoom, and pan around the 3D model
-          </p>
-          <p className="text-xs mt-2">
-            Left click + drag: Rotate | Right click + drag: Pan | Scroll: Zoom
-          </p>
-        </div>
       </div>
     </main>
   );

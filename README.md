@@ -19,9 +19,9 @@ A demo application for viewing Gaussian Splats 3D data using [GaussianSplats3D](
 - [x] Implement PLY file loader for storeroom.ply data
 
 ### Medium Priority
-- [ ] Add camera controls (orbit, zoom, pan)
+- [x] Add camera controls (orbit, zoom, pan)
 - [ ] Create UI controls for viewer settings (quality, render mode)
-- [ ] Implement loading state and progress indicator
+- [x] Implement loading state and progress indicator
 
 ### Low Priority
 - [ ] Add responsive design for mobile/desktop viewing

@@ -1,20 +1,25 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Viewer } from '@mkkellogg/gaussian-splats-3d';
+import CameraControls from './CameraControls';
 
 interface GaussianSplatViewerProps {
   modelUrl: string;
   className?: string;
+  showControls?: boolean;
 }
 
-export default function GaussianSplatViewer({ modelUrl, className = '' }: GaussianSplatViewerProps) {
+export default function GaussianSplatViewer({ modelUrl, className = '', showControls = true }: GaussianSplatViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const viewerContainerRef = useRef<HTMLDivElement | null>(null);
+  const cameraRef = useRef<any>(null);
+  const controlsRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -77,6 +82,14 @@ export default function GaussianSplatViewer({ modelUrl, className = '' }: Gaussi
         if (mounted && !isDisposed) {
           viewer.start();
           setLoading(false);
+          setIsInitialized(true);
+          
+          // Store camera and controls references
+          const scene = (viewer as any).splatMesh?.scene;
+          if (scene) {
+            cameraRef.current = scene.activeCamera;
+            controlsRef.current = scene.controls;
+          }
         }
       } catch (err) {
         console.error('Error loading model:', err);
@@ -119,9 +132,75 @@ export default function GaussianSplatViewer({ modelUrl, className = '' }: Gaussi
     };
   }, [modelUrl]);
 
+  // Camera control handlers
+  const handleResetCamera = useCallback(() => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      if (viewer.camera) {
+        viewer.camera.position.set(0, 0, 5);
+        viewer.camera.lookAt(0, 0, 0);
+        viewer.camera.updateProjectionMatrix();
+      }
+      
+      if (viewer.controls) {
+        viewer.controls.reset();
+      }
+    } catch (err) {
+      console.warn('Error resetting camera:', err);
+    }
+  }, [isInitialized]);
+
+  const handleZoomIn = useCallback(() => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      if (viewer.camera) {
+        const zoomFactor = 0.8;
+        viewer.camera.position.multiplyScalar(zoomFactor);
+        viewer.camera.updateProjectionMatrix();
+      }
+    } catch (err) {
+      console.warn('Error zooming in:', err);
+    }
+  }, [isInitialized]);
+
+  const handleZoomOut = useCallback(() => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      if (viewer.camera) {
+        const zoomFactor = 1.2;
+        viewer.camera.position.multiplyScalar(zoomFactor);
+        viewer.camera.updateProjectionMatrix();
+      }
+    } catch (err) {
+      console.warn('Error zooming out:', err);
+    }
+  }, [isInitialized]);
+
+  const handleToggleMode = useCallback((mode: 'orbit' | 'pan') => {
+    // The built-in controls handle this through mouse button mapping
+    // Left click = rotate, right click = pan by default
+    console.log('Camera mode:', mode);
+  }, []);
+
   return (
     <div className={`relative w-full h-full ${className}`}>
       <div ref={containerRef} className="w-full h-full" />
+      
+      {/* Camera Controls */}
+      {showControls && isInitialized && !loading && !error && (
+        <CameraControls
+          onReset={handleResetCamera}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onToggleMode={handleToggleMode}
+        />
+      )}
       
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
