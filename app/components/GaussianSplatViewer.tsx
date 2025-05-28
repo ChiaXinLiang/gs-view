@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Viewer } from '@mkkellogg/gaussian-splats-3d';
 import CameraControls from './CameraControls';
+import ViewerSettings from './ViewerSettings';
 
 interface GaussianSplatViewerProps {
   modelUrl: string;
@@ -14,12 +15,25 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const viewerContainerRef = useRef<HTMLDivElement | null>(null);
-  const cameraRef = useRef<any>(null);
-  const controlsRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [renderQuality, setRenderQuality] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gs-viewer-quality');
+      return saved ? parseInt(saved) : 2;
+    }
+    return 2;
+  });
+  
+  const [renderMode, setRenderMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gs-viewer-renderMode');
+      return saved ? parseInt(saved) : 2;
+    }
+    return 2;
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -46,7 +60,8 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           cameraUp: [0, -1, 0],
           initialCameraPosition: [0, 0, 5],
           initialCameraLookAt: [0, 0, 0],
-          splatRenderMode: 2, // Three.js renderer mode
+          splatRenderMode: renderMode, // Use current render mode
+          renderReductionFactor: renderQuality, // Use current quality
           antialiased: true,
           useBuiltInControls: true,
           ignoreDevicePixelRatio: false,
@@ -84,11 +99,22 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           setLoading(false);
           setIsInitialized(true);
           
-          // Store camera and controls references
-          const scene = (viewer as any).splatMesh?.scene;
-          if (scene) {
-            cameraRef.current = scene.activeCamera;
-            controlsRef.current = scene.controls;
+          // Store viewer reference for settings
+          viewerRef.current = viewer;
+          
+          // Log available methods to debug
+          console.log('Viewer methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(viewer)));
+          
+          // Check what properties/methods are available
+          console.log('Viewer object:', viewer);
+          console.log('Viewer properties:', Object.keys(viewer));
+          
+          // Look for render-related properties
+          if ((viewer as any).renderReductionFactor !== undefined) {
+            console.log('Found renderReductionFactor property');
+          }
+          if ((viewer as any).splatRenderMode !== undefined) {
+            console.log('Found splatRenderMode property');
           }
         }
       } catch (err) {
@@ -188,9 +214,68 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     console.log('Camera mode:', mode);
   }, []);
 
+  // Settings handlers
+  const handleQualityChange = useCallback((quality: number) => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      
+      // Try different possible method names
+      if (typeof viewer.setRenderReductionFactor === 'function') {
+        viewer.setRenderReductionFactor(quality);
+      } else if (typeof viewer.renderReductionFactor !== 'undefined') {
+        viewer.renderReductionFactor = quality;
+      } else if (viewer.renderer && typeof viewer.renderer.setPixelRatio === 'function') {
+        // Alternative: adjust pixel ratio for quality
+        const pixelRatio = window.devicePixelRatio / quality;
+        viewer.renderer.setPixelRatio(pixelRatio);
+      }
+      
+      setRenderQuality(quality);
+      localStorage.setItem('gs-viewer-quality', quality.toString());
+      console.log('Quality changed to:', quality, '(will apply on refresh)');
+    } catch (err) {
+      console.warn('Error changing quality:', err);
+    }
+  }, [isInitialized]);
+
+  const handleRenderModeChange = useCallback((mode: number) => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      
+      // Try different possible method names
+      if (typeof viewer.setSplatRenderMode === 'function') {
+        viewer.setSplatRenderMode(mode);
+      } else if (typeof viewer.splatRenderMode !== 'undefined') {
+        viewer.splatRenderMode = mode;
+      } else if (viewer.splats && typeof viewer.splats.renderMode !== 'undefined') {
+        viewer.splats.renderMode = mode;
+      }
+      
+      setRenderMode(mode);
+      localStorage.setItem('gs-viewer-renderMode', mode.toString());
+      console.log('Render mode changed to:', mode, '(will apply on refresh)');
+    } catch (err) {
+      console.warn('Error changing render mode:', err);
+    }
+  }, [isInitialized]);
+
   return (
     <div className={`relative w-full h-full ${className}`}>
       <div ref={containerRef} className="w-full h-full" />
+      
+      {/* Viewer Settings */}
+      {showControls && isInitialized && !loading && !error && (
+        <ViewerSettings
+          onQualityChange={handleQualityChange}
+          onRenderModeChange={handleRenderModeChange}
+          currentQuality={renderQuality}
+          currentRenderMode={renderMode}
+        />
+      )}
       
       {/* Camera Controls */}
       {showControls && isInitialized && !loading && !error && (
