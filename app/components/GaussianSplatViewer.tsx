@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Viewer } from '@mkkellogg/gaussian-splats-3d';
+import { Zap } from 'lucide-react';
 import CameraControls from './CameraControls';
 import ViewerSettings from './ViewerSettings';
 import MobileControls from './MobileControls';
+import ExportControls from './ExportControls';
+import PerformanceMonitor from './PerformanceMonitor';
+import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
 
 interface GaussianSplatViewerProps {
   modelUrl: string;
@@ -34,6 +38,14 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
       return saved ? parseInt(saved) : 2;
     }
     return 2;
+  });
+  
+  const [autoOptimizeEnabled, setAutoOptimizeEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gs-viewer-autoOptimize');
+      return saved === 'true';
+    }
+    return false;
   });
 
   useEffect(() => {
@@ -70,6 +82,9 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           sharedMemoryForWorkers: false,
           integerBasedSort: false,
           dynamicScene: false,
+          webGLContextAttributes: {
+            preserveDrawingBuffer: true, // Important for screenshots
+          },
         });
 
         if (!mounted || isDisposed) {
@@ -264,17 +279,111 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     }
   }, [isInitialized]);
 
+  // Export handlers
+  const handleScreenshot = useCallback(() => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      if (viewer.renderer && viewer.renderer.domElement) {
+        const canvas = viewer.renderer.domElement as HTMLCanvasElement;
+        
+        // Wait for next frame to ensure content is rendered
+        requestAnimationFrame(() => {
+          try {
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `gaussian-splat-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (err) {
+            console.error('Error capturing canvas:', err);
+            alert('Failed to capture screenshot. The canvas might be tainted.');
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error taking screenshot:', err);
+      alert('Failed to take screenshot. Please try again.');
+    }
+  }, [isInitialized]);
+
+  const handleAutoOptimizeToggle = useCallback((enabled: boolean) => {
+    setAutoOptimizeEnabled(enabled);
+    localStorage.setItem('gs-viewer-autoOptimize', enabled.toString());
+  }, []);
+
+  // Use performance optimization hook
+  const { isOptimizing } = usePerformanceOptimization(
+    viewerRef.current,
+    handleQualityChange,
+    {
+      enabled: autoOptimizeEnabled && isInitialized,
+      targetFPS: 30,
+      measurementInterval: 3000
+    }
+  );
+
+  const handleExportImage = useCallback((format: 'png' | 'jpeg') => {
+    if (!viewerRef.current || !isInitialized) return;
+    
+    try {
+      const viewer = viewerRef.current as any;
+      if (viewer.renderer && viewer.renderer.domElement) {
+        const canvas = viewer.renderer.domElement as HTMLCanvasElement;
+        
+        // Wait for next frame to ensure content is rendered
+        requestAnimationFrame(() => {
+          try {
+            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+            const quality = format === 'jpeg' ? 0.95 : 1.0;
+            
+            const dataUrl = canvas.toDataURL(mimeType, quality);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `gaussian-splat-${Date.now()}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (err) {
+            console.error('Error capturing canvas:', err);
+            alert(`Failed to capture ${format.toUpperCase()}. The canvas might be tainted.`);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error exporting image:', err);
+      alert(`Failed to export as ${format.toUpperCase()}. Please try again.`);
+    }
+  }, [isInitialized]);
+
   return (
     <div className={`relative w-full h-full ${className}`}>
       <div ref={containerRef} className="w-full h-full" />
+      
+      {/* Export Controls */}
+      {showControls && isInitialized && !loading && !error && (
+        <ExportControls
+          onScreenshot={handleScreenshot}
+          onExportImage={handleExportImage}
+        />
+      )}
       
       {/* Viewer Settings */}
       {showControls && isInitialized && !loading && !error && (
         <ViewerSettings
           onQualityChange={handleQualityChange}
           onRenderModeChange={handleRenderModeChange}
+          onAutoOptimizeToggle={handleAutoOptimizeToggle}
           currentQuality={renderQuality}
           currentRenderMode={renderMode}
+          autoOptimizeEnabled={autoOptimizeEnabled}
         />
       )}
       
@@ -291,6 +400,19 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
       {/* Mobile Controls Info */}
       {showControls && isInitialized && !loading && !error && (
         <MobileControls />
+      )}
+      
+      {/* Performance Monitor */}
+      {showControls && isInitialized && !loading && !error && (
+        <PerformanceMonitor viewer={viewerRef.current} />
+      )}
+      
+      {/* Auto-optimization indicator */}
+      {isOptimizing && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-600/90 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs sm:text-sm flex items-center gap-2">
+          <Zap className="w-3 h-3 animate-pulse" />
+          <span>Optimizing performance...</span>
+        </div>
       )}
       
       {loading && (
