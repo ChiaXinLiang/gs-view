@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, Palette, Gauge, ChevronDown } from 'lucide-react';
+import { Settings, Palette, Gauge, ChevronDown, Zap } from 'lucide-react';
 
 interface ViewerSettingsProps {
   onQualityChange?: (quality: number) => void;
   onRenderModeChange?: (mode: number) => void;
+  onAutoOptimizeToggle?: (enabled: boolean) => void;
   currentQuality?: number;
   currentRenderMode?: number;
+  autoOptimizeEnabled?: boolean;
   className?: string;
   showRestartHint?: boolean;
 }
@@ -15,8 +17,10 @@ interface ViewerSettingsProps {
 export default function ViewerSettings({
   onQualityChange,
   onRenderModeChange,
+  onAutoOptimizeToggle,
   currentQuality = 2,
   currentRenderMode = 2,
+  autoOptimizeEnabled = false,
   className = '',
   showRestartHint = false
 }: ViewerSettingsProps) {
@@ -103,6 +107,31 @@ export default function ViewerSettings({
                   </button>
                 ))}
               </div>
+            </div>
+            
+            {/* Auto-Optimize Toggle */}
+            <div className="px-2 sm:px-3">
+              <button
+                onClick={() => onAutoOptimizeToggle?.(!autoOptimizeEnabled)}
+                className={`w-full flex items-center justify-between px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm transition-all ${
+                  autoOptimizeEnabled
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Zap className="w-3 sm:w-4 h-3 sm:h-4" />
+                  <span className="font-medium">Auto-Optimize</span>
+                </div>
+                <span className="text-xs">
+                  {autoOptimizeEnabled ? 'ON' : 'OFF'}
+                </span>
+              </button>
+              {autoOptimizeEnabled && (
+                <p className="text-xs text-gray-400 mt-1 px-2">
+                  Automatically adjusts quality for 30+ FPS
+                </p>
+              )}
             </div>
             
             {/* Restart hint */}
