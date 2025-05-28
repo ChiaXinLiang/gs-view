@@ -20,7 +20,7 @@ A demo application for viewing Gaussian Splats 3D data using [GaussianSplats3D](
 
 ### Medium Priority
 - [x] Add camera controls (orbit, zoom, pan)
-- [ ] Create UI controls for viewer settings (quality, render mode)
+- [x] Create UI controls for viewer settings (quality, render mode)
 - [x] Implement loading state and progress indicator
 
 ### Low Priority
