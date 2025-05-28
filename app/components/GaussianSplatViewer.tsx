@@ -283,10 +283,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     try {
       const viewer = viewerRef.current as any;
       if (viewer.renderer && viewer.renderer.domElement) {
-        // Force a render before capturing
-        viewer.renderer.render(viewer.scene, viewer.camera);
-        
-        // Get the canvas and create a data URL
+        // Don't force render - just capture current state
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
         const dataUrl = canvas.toDataURL('image/png');
         
@@ -326,9 +323,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     try {
       const viewer = viewerRef.current as any;
       if (viewer.renderer && viewer.renderer.domElement) {
-        // Force a render before capturing
-        viewer.renderer.render(viewer.scene, viewer.camera);
-        
+        // Don't force render - just capture current state
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
         const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
         const quality = format === 'jpeg' ? 0.95 : 1.0;
