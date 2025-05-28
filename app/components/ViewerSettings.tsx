@@ -36,28 +36,28 @@ export default function ViewerSettings({
   ];
 
   return (
-    <div className={`absolute top-4 left-4 ${className}`}>
-      <div className="bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700 p-2 min-w-[240px]">
+    <div className={`absolute top-2 sm:top-4 left-2 sm:left-4 ${className}`}>
+      <div className="bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700 p-1 sm:p-2 min-w-[200px] sm:min-w-[240px]">
         {/* Settings Toggle */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-white transition-colors"
+          className="w-full flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 text-gray-300 hover:text-white transition-colors"
         >
-          <Settings className="w-5 h-5" />
-          <span className="text-sm font-medium">Viewer Settings</span>
-          <ChevronDown className={`w-4 h-4 ml-auto transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          <Settings className="w-4 sm:w-5 h-4 sm:h-5" />
+          <span className="text-xs sm:text-sm font-medium">Settings</span>
+          <ChevronDown className={`w-3 sm:w-4 h-3 sm:h-4 ml-auto transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Expanded Settings */}
         {isExpanded && (
-          <div className="mt-2 pt-2 border-t border-gray-700 space-y-4">
+          <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-gray-700 space-y-2 sm:space-y-4">
             {/* Quality Setting */}
-            <div className="px-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Gauge className="w-4 h-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-300">Quality</span>
+            <div className="px-2 sm:px-3">
+              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                <Gauge className="w-3 sm:w-4 h-3 sm:h-4 text-gray-400" />
+                <span className="text-xs sm:text-sm font-medium text-gray-300">Quality</span>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5 sm:space-y-1">
                 {qualityOptions.map((option) => (
                   <button
                     key={option.value}
@@ -65,26 +65,26 @@ export default function ViewerSettings({
                       onQualityChange?.(option.value);
                       setHasChanges(true);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all ${
+                    className={`w-full text-left px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm transition-all ${
                       currentQuality === option.value
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                     }`}
                   >
                     <div className="font-medium">{option.label}</div>
-                    <div className="text-xs opacity-70">{option.description}</div>
+                    <div className="text-xs opacity-70 hidden sm:block">{option.description}</div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Render Mode Setting */}
-            <div className="px-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Palette className="w-4 h-4 text-gray-400" />
-                <span className="text-sm font-medium text-gray-300">Render Mode</span>
+            <div className="px-2 sm:px-3">
+              <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                <Palette className="w-3 sm:w-4 h-3 sm:h-4 text-gray-400" />
+                <span className="text-xs sm:text-sm font-medium text-gray-300">Render Mode</span>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5 sm:space-y-1">
                 {renderModes.map((mode) => (
                   <button
                     key={mode.value}
@@ -92,14 +92,14 @@ export default function ViewerSettings({
                       onRenderModeChange?.(mode.value);
                       setHasChanges(true);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all ${
+                    className={`w-full text-left px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm transition-all ${
                       currentRenderMode === mode.value
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                     }`}
                   >
                     <div className="font-medium">{mode.label}</div>
-                    <div className="text-xs opacity-70">{mode.description}</div>
+                    <div className="text-xs opacity-70 hidden sm:block">{mode.description}</div>
                   </button>
                 ))}
               </div>
@@ -107,8 +107,8 @@ export default function ViewerSettings({
             
             {/* Restart hint */}
             {hasChanges && (
-              <div className="px-3 pb-2">
-                <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-md p-2 text-xs text-yellow-300">
+              <div className="px-2 sm:px-3 pb-1 sm:pb-2">
+                <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-md p-1 sm:p-2 text-xs text-yellow-300">
                   Settings will apply after refreshing the page
                 </div>
               </div>

@@ -24,7 +24,7 @@ A demo application for viewing Gaussian Splats 3D data using [GaussianSplats3D](
 - [x] Implement loading state and progress indicator
 
 ### Low Priority
-- [ ] Add responsive design for mobile/desktop viewing
+- [x] Add responsive design for mobile/desktop viewing
 - [ ] Optimize performance for smooth rendering
 - [ ] Add export/screenshot functionality
 
