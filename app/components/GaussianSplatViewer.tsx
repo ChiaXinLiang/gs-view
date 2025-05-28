@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Viewer } from '@mkkellogg/gaussian-splats-3d';
 import CameraControls from './CameraControls';
 import ViewerSettings from './ViewerSettings';
+import MobileControls from './MobileControls';
 
 interface GaussianSplatViewerProps {
   modelUrl: string;
@@ -287,23 +288,28 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
         />
       )}
       
+      {/* Mobile Controls Info */}
+      {showControls && isInitialized && !loading && !error && (
+        <MobileControls />
+      )}
+      
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none">
           <div className="text-center">
-            <div className="mb-4">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="mb-2 sm:mb-4">
+              <div className="w-12 sm:w-16 h-12 sm:h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
-            <p className="text-white text-lg">Loading 3D Model...</p>
-            <p className="text-white text-sm mt-2">{progress}%</p>
+            <p className="text-white text-sm sm:text-lg">Loading 3D Model...</p>
+            <p className="text-white text-xs sm:text-sm mt-1 sm:mt-2">{progress}%</p>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/75">
-          <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 max-w-md">
-            <h3 className="text-red-500 text-lg font-semibold mb-2">Error Loading Model</h3>
-            <p className="text-red-300 text-sm">{error}</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/75 p-4">
+          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 sm:p-6 max-w-md w-full">
+            <h3 className="text-red-500 text-base sm:text-lg font-semibold mb-1 sm:mb-2">Error Loading Model</h3>
+            <p className="text-red-300 text-xs sm:text-sm">{error}</p>
           </div>
         </div>
       )}
