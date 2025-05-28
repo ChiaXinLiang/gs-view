@@ -82,6 +82,9 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           sharedMemoryForWorkers: false,
           integerBasedSort: false,
           dynamicScene: false,
+          webGLContextAttributes: {
+            preserveDrawingBuffer: true, // Important for screenshots
+          },
         });
 
         if (!mounted || isDisposed) {
@@ -283,17 +286,25 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     try {
       const viewer = viewerRef.current as any;
       if (viewer.renderer && viewer.renderer.domElement) {
-        // Don't force render - just capture current state
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png');
         
-        // Create download link
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `gaussian-splat-${Date.now()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Wait for next frame to ensure content is rendered
+        requestAnimationFrame(() => {
+          try {
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `gaussian-splat-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (err) {
+            console.error('Error capturing canvas:', err);
+            alert('Failed to capture screenshot. The canvas might be tainted.');
+          }
+        });
       }
     } catch (err) {
       console.error('Error taking screenshot:', err);
@@ -323,21 +334,28 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     try {
       const viewer = viewerRef.current as any;
       if (viewer.renderer && viewer.renderer.domElement) {
-        // Don't force render - just capture current state
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
-        const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-        const quality = format === 'jpeg' ? 0.95 : 1.0;
         
-        // Use toDataURL instead of toBlob for better compatibility
-        const dataUrl = canvas.toDataURL(mimeType, quality);
-        
-        // Create download link
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `gaussian-splat-${Date.now()}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Wait for next frame to ensure content is rendered
+        requestAnimationFrame(() => {
+          try {
+            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+            const quality = format === 'jpeg' ? 0.95 : 1.0;
+            
+            const dataUrl = canvas.toDataURL(mimeType, quality);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `gaussian-splat-${Date.now()}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (err) {
+            console.error('Error capturing canvas:', err);
+            alert(`Failed to capture ${format.toUpperCase()}. The canvas might be tainted.`);
+          }
+        });
       }
     } catch (err) {
       console.error('Error exporting image:', err);
