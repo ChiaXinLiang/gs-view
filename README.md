@@ -14,7 +14,7 @@ A demo application for viewing Gaussian Splats 3D data using [GaussianSplats3D](
 
 ### High Priority
 - [x] Set up Next.js project with TypeScript
-- [ ] Install and configure GaussianSplats3D library
+- [x] Install and configure GaussianSplats3D library
 - [ ] Create 3D viewer component with Three.js integration
 - [ ] Implement PLY file loader for storeroom.ply data
 
