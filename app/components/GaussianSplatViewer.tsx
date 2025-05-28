@@ -9,6 +9,7 @@ import MobileControls from './MobileControls';
 import ExportControls from './ExportControls';
 import PerformanceMonitor from './PerformanceMonitor';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
+import type { GaussianSplatViewer } from '../types/gaussian-splats';
 
 interface GaussianSplatViewerProps {
   modelUrl: string;
@@ -18,7 +19,7 @@ interface GaussianSplatViewerProps {
 
 export default function GaussianSplatViewer({ modelUrl, className = '', showControls = true }: GaussianSplatViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<Viewer | null>(null);
+  const viewerRef = useRef<GaussianSplatViewer | null>(null);
   const viewerContainerRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -82,6 +83,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           sharedMemoryForWorkers: false,
           integerBasedSort: false,
           dynamicScene: false,
+          // @ts-expect-error - webGLContextAttributes is not in the type definition but is needed for screenshots
           webGLContextAttributes: {
             preserveDrawingBuffer: true, // Important for screenshots
           },
@@ -92,7 +94,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           return;
         }
 
-        viewerRef.current = viewer;
+        viewerRef.current = viewer as unknown as GaussianSplatViewer;
         
         setLoading(true);
         setError(null);
@@ -116,7 +118,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           setIsInitialized(true);
           
           // Store viewer reference for settings
-          viewerRef.current = viewer;
+          viewerRef.current = viewer as unknown as GaussianSplatViewer;
           
           // Log available methods to debug
           console.log('Viewer methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(viewer)));
@@ -126,10 +128,11 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
           console.log('Viewer properties:', Object.keys(viewer));
           
           // Look for render-related properties
-          if ((viewer as any).renderReductionFactor !== undefined) {
+          const typedViewer = viewer as unknown as GaussianSplatViewer;
+          if (typedViewer.renderReductionFactor !== undefined) {
             console.log('Found renderReductionFactor property');
           }
-          if ((viewer as any).splatRenderMode !== undefined) {
+          if (typedViewer.splatRenderMode !== undefined) {
             console.log('Found splatRenderMode property');
           }
         }
@@ -172,14 +175,14 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
         viewerContainerRef.current = null;
       }
     };
-  }, [modelUrl]);
+  }, [modelUrl, renderMode, renderQuality]);
 
   // Camera control handlers
   const handleResetCamera = useCallback(() => {
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       if (viewer.camera) {
         viewer.camera.position.set(0, 0, 5);
         viewer.camera.lookAt(0, 0, 0);
@@ -198,7 +201,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       if (viewer.camera) {
         const zoomFactor = 0.8;
         viewer.camera.position.multiplyScalar(zoomFactor);
@@ -213,7 +216,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       if (viewer.camera) {
         const zoomFactor = 1.2;
         viewer.camera.position.multiplyScalar(zoomFactor);
@@ -235,7 +238,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       
       // Try different possible method names
       if (typeof viewer.setRenderReductionFactor === 'function') {
@@ -260,7 +263,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       
       // Try different possible method names
       if (typeof viewer.setSplatRenderMode === 'function') {
@@ -284,7 +287,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       if (viewer.renderer && viewer.renderer.domElement) {
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
         
@@ -332,7 +335,7 @@ export default function GaussianSplatViewer({ modelUrl, className = '', showCont
     if (!viewerRef.current || !isInitialized) return;
     
     try {
-      const viewer = viewerRef.current as any;
+      const viewer = viewerRef.current;
       if (viewer.renderer && viewer.renderer.domElement) {
         const canvas = viewer.renderer.domElement as HTMLCanvasElement;
         

@@ -21,8 +21,7 @@ export default function ViewerSettings({
   currentQuality = 2,
   currentRenderMode = 2,
   autoOptimizeEnabled = false,
-  className = '',
-  showRestartHint = false
+  className = ''
 }: ViewerSettingsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);

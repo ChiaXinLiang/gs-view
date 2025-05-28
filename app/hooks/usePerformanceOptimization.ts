@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { GaussianSplatViewer } from '../types/gaussian-splats';
 
 interface PerformanceOptimizationOptions {
   targetFPS?: number;
@@ -7,7 +8,7 @@ interface PerformanceOptimizationOptions {
 }
 
 export function usePerformanceOptimization(
-  viewer: any,
+  viewer: GaussianSplatViewer | null,
   onQualityChange: (quality: number) => void,
   options: PerformanceOptimizationOptions = {}
 ) {
@@ -27,7 +28,6 @@ export function usePerformanceOptimization(
     if (!viewer || !enabled) return;
 
     let animationId: number;
-    let checkInterval: NodeJS.Timeout;
 
     const measureFPS = () => {
       frameCountRef.current++;
@@ -71,7 +71,7 @@ export function usePerformanceOptimization(
 
     // Start measuring
     animationId = requestAnimationFrame(measureFPS);
-    checkInterval = setInterval(checkPerformance, measurementInterval);
+    const checkInterval = setInterval(checkPerformance, measurementInterval);
 
     return () => {
       cancelAnimationFrame(animationId);
