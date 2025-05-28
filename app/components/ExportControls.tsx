@@ -75,6 +75,7 @@ export default function ExportControls({
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
               }`}
             >
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image className="w-3 sm:w-4 h-3 sm:h-4" />
               <span>Export PNG</span>
             </button>

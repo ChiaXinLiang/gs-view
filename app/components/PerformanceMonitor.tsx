@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Activity, X } from 'lucide-react';
+import type { GaussianSplatViewer } from '../types/gaussian-splats';
 
 interface PerformanceMonitorProps {
-  viewer?: any;
+  viewer?: GaussianSplatViewer | null;
   className?: string;
 }
 
@@ -20,7 +21,6 @@ export default function PerformanceMonitor({ viewer, className = '' }: Performan
     if (!viewer || !isVisible) return;
 
     let animationId: number;
-    const startTime = performance.now();
 
     const measurePerformance = () => {
       const currentTime = performance.now();
@@ -38,7 +38,7 @@ export default function PerformanceMonitor({ viewer, className = '' }: Performan
 
       // Check memory if available
       if ('memory' in performance) {
-        const memInfo = (performance as any).memory;
+        const memInfo = (performance as Performance & { memory: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
         setMemory({
           used: Math.round(memInfo.usedJSHeapSize / 1048576), // Convert to MB
           total: Math.round(memInfo.totalJSHeapSize / 1048576)
