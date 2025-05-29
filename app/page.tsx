@@ -8,16 +8,18 @@ const GaussianSplatViewer = dynamic(
 );
 
 export default function Home() {
+  const modelUrl = process.env.NEXT_PUBLIC_GAUSSIAN_MODEL_URL || '/models/storeroom.ply';
+  
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-2 sm:p-4 bg-gray-900">
       <div className="w-full max-w-6xl">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-4 sm:mb-6 md:mb-8">
-          Gaussian Splats 3D Viewer
+          41號碼頭倉儲貨物模擬GS
         </h1>
         
         <div className="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] bg-black rounded-lg overflow-hidden shadow-2xl">
           <GaussianSplatViewer 
-            modelUrl="/models/storeroom.ply"
+            modelUrl={modelUrl}
             className="w-full h-full"
           />
         </div>

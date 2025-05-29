@@ -30,6 +30,38 @@ A demo application for viewing Gaussian Splats 3D data using [GaussianSplats3D](
 
 ## Getting Started
 
+### Installation
+
+```bash
+# Install dependencies
+bun install
+
+# Copy environment variables
+cp .env.example .env.local
+```
+
+### Using Custom Models
+
+1. **Add your PLY model file**: Place your `.ply` file in the `public/models/` directory
+   ```
+   public/
+   └── models/
+       ├── storeroom.ply (default)
+       └── your-model.ply
+   ```
+
+2. **Configure the model URL**: Edit `.env.local` and set your model path
+   ```env
+   NEXT_PUBLIC_GAUSSIAN_MODEL_URL=/models/your-model.ply
+   ```
+
+3. **Start the application**:
+   ```bash
+   bun run dev
+   ```
+
+### Development Commands
+
 ```bash
 bun run dev       # Start development server
 bun run build     # Build for production
